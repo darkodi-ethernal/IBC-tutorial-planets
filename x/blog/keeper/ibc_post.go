@@ -3,12 +3,14 @@ package keeper
 import (
 	"errors"
 
+	"planet/x/blog/types"
+	"strconv"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	clienttypes "github.com/cosmos/ibc-go/v3/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v3/modules/core/04-channel/types"
 	host "github.com/cosmos/ibc-go/v3/modules/core/24-host"
-	"planet/x/blog/types"
 )
 
 // TransmitIbcPostPacket transmits the packet over IBC with the specified source port and source channel
@@ -74,6 +76,16 @@ func (k Keeper) OnRecvIbcPostPacket(ctx sdk.Context, packet channeltypes.Packet,
 	}
 
 	// TODO: packet reception logic
+	id := k.AppendPost(
+		ctx,
+		types.Post{
+			Creator: packet.SourcePort + "-" + packet.SourceChannel + "-" + data.Creator,
+			Title:   data.Title,
+			Content: data.Content,
+		},
+	)
+
+	packetAck.PostID = strconv.FormatUint(id, 10)
 
 	return packetAck, nil
 }
