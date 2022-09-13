@@ -96,8 +96,7 @@ func (k Keeper) OnAcknowledgementIbcPostPacket(ctx sdk.Context, packet channelty
 	switch dispatchedAck := ack.Response.(type) {
 	case *channeltypes.Acknowledgement_Error:
 
-		// TODO: failed acknowledgement logic
-		_ = dispatchedAck.Error
+		// We will not treat acknowledgment error in this tutorial
 
 		return nil
 	case *channeltypes.Acknowledgement_Result:
@@ -110,6 +109,15 @@ func (k Keeper) OnAcknowledgementIbcPostPacket(ctx sdk.Context, packet channelty
 		}
 
 		// TODO: successful acknowledgement logic
+		k.AppendSentPost(
+			ctx,
+			types.SentPost{
+				Creator: data.Creator,
+				PostID:  packetAck.PostID,
+				Title:   data.Title,
+				Chain:   packet.DestinationPort + "-" + packet.DestinationChannel,
+			},
+		)
 
 		return nil
 	default:
